@@ -31,7 +31,7 @@ const app = express();
 const userModel = require("./models/user.model");
 
 // importing db connection
-const dbConnection = require('./config/db');
+const dbConnection = require("./config/db");
 
 const port = 3000;
 
@@ -41,7 +41,7 @@ app.use(morgan("dev"));
 
 // Built-in middleware for common tasks, such as serving static files or parsing request bodies:
 app.use(express.json());
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 // HTML rendering in frontend in express
@@ -59,15 +59,15 @@ app.set("view engine", "ejs");
 
 app.get(
   "/",
-//   (req, res, next) => {
-//     console.log("Time", Date.now());
+  //   (req, res, next) => {
+  //     console.log("Time", Date.now());
 
-//     const a = 1;
-//     const b = 4;
-//     console.log(a + b);
+  //     const a = 1;
+  //     const b = 4;
+  //     console.log(a + b);
 
-//     next();
-//   },
+  //     next();
+  //   },
   (req, res) => {
     res.render("index");
   }
@@ -81,37 +81,66 @@ app.get("/contact", (req, res) => {
   res.send("Contact Page");
 });
 
-app.get('/register' , (req, res) => {
-  res.render('register');
-})
+app.get("/register", (req, res) => {
+  res.render("register");
+});
 
 // creating a post request for register  page
-app.post('/register', async (req, res) => {
-  const {username, email, password} = req.body;
+app.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
 
   const newUser = await userModel.create({
     username: username,
     email: email,
-    password: password
-  })
+    password: password,
+  });
 
   res.send(newUser);
-  
-})
+});
 
-// creating a get request for getting all users
-app.get('/get-users', (req, res) => {
-  userModel.find().then((users) => {
-    res.send(users);
+// creating a get request for getting  users
+app.get("/get-users", (req, res) => {
+  // for finding all users in database and return empty array if not found
+  // userModel.find().then((users) => {
+  //   res.send(users);
+  // })
+
+  // for finding a single user in database and return empty null if not found
+  userModel
+    .findOne({
+      username: "sujan",
+    })
+    .then((user) => {
+      res.send(user);
+    });
+});
+
+// creating a get request for updating user
+app.get("/update-user", async (req, res) => {
+  await userModel.findOneAndUpdate(
+    {
+      username: "ram",
+    },
+    {
+      email: "abc123@gmail.com",
+    }
+  );
+  res.send("User updated");
+});
+
+// creating a get request for deleting user
+
+app.get('/delete-user', async (req, res) =>  {
+  await userModel.findOneAndDelete({
+    username: "sujan"
   })
+  res.send("User deleted");
 })
 
-app.post('/get-form-data', (req, res) => {
-    console.log(req.body);
-    res.send('Data received');
-})
-
-
+app.post("/get-form-data", (req, res) => {
+  console.log(req.body);
+  res.send("Data received");
+});
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
