@@ -27,6 +27,12 @@
 const express = require("express");
 const app = express();
 
+// importing user model
+const userModel = require("./models/user.model");
+
+// importing db connection
+const dbConnection = require('./config/db');
+
 const port = 3000;
 
 // Third party middleware
@@ -42,14 +48,14 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 //custom middleware
-app.use((req, res, next) => {
-  console.log("This is middleware");
-  const a = 12;
-  const b = 34;
-  console.log(a + b);
+// app.use((req, res, next) => {
+//   console.log("This is middleware");
+//   const a = 12;
+//   const b = 34;
+//   console.log(a + b);
 
-  return next();
-});
+//   return next();
+// });
 
 app.get(
   "/",
@@ -75,10 +81,37 @@ app.get("/contact", (req, res) => {
   res.send("Contact Page");
 });
 
+app.get('/register' , (req, res) => {
+  res.render('register');
+})
+
+// creating a post request for register  page
+app.post('/register', async (req, res) => {
+  const {username, email, password} = req.body;
+
+  const newUser = await userModel.create({
+    username: username,
+    email: email,
+    password: password
+  })
+
+  res.send(newUser);
+  
+})
+
+// creating a get request for getting all users
+app.get('/get-users', (req, res) => {
+  userModel.find().then((users) => {
+    res.send(users);
+  })
+})
+
 app.post('/get-form-data', (req, res) => {
     console.log(req.body);
     res.send('Data received');
 })
+
+
 
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
